@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^(app|tests)/
+      - id: ruff-format
+        files: ^(app|tests)/
+  - repo: local
+    hooks:
+      - id: pre-push-check
+        name: pre-push-check
+        entry: ./scripts/pre_push_check.sh
+        language: script
+        stages: [pre-push]
+        pass_filenames: false

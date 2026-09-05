@@ -1,0 +1,40 @@
+{
+  "faqs": [
+    {
+      "question": "Do I need an account to check out?",
+      "answer": "No, creating an account is not required to make a purchase. However, signing up for an account is highly recommended to enjoy faster checkout, track your order history, and receive exclusive updates on product launches."
+    },
+    {
+      "question": "How long will my order take to arrive?",
+      "answer": "Orders typically ship from our warehouse within 36-48 business hours if the item is in stock. For small parcel deliveries, expect 1-3 business days for West Coast delivery and up to 7 business days for East Coast delivery. For large or heavy shipments, the trucking carrier will contact you to schedule a delivery time."
+    },
+    {
+      "question": "How can I track my order?",
+      "answer": "Once your order is with the carrier, we will email you a link to track your shipment. Tracking updates may take 24-48 business hours to reflect."
+    },
+    {
+      "question": "What is your shipping policy?",
+      "answer": "Small packages ship via FedEx Ground, UPS Ground, or USPS (1-7 business days). Oversized/heavy shipments ship via freight carrier with free curbside delivery within the contiguous US (2-10 business days). Pick-up at our warehouse saves $100-$150 on orders over $900. Please inspect packages upon delivery and report visible damage or wrong/missing items to support@example-retail.com or (800) 555-0199."
+    },
+    {
+      "question": "What is your return policy?",
+      "answer": "We accept returns within 90 days of purchase. Items must be uninstalled, in perfect condition, and in original packaging. There are no extra return or restocking fees, except that the customer is responsible for the return shipping fee. Damaged packages/original packaging may incur a restocking fee of up to 25%."
+    },
+    {
+      "question": "What is your refund policy?",
+      "answer": "After your return arrives at our fulfillment center, please allow 5 business days for the item to be processed. For refunds, please allow another 10 business days for your financial institution to credit your account."
+    },
+    {
+      "question": "How do I cancel my order?",
+      "answer": "Please call us immediately at (800) 555-0199 if you need to cancel your order. Cancellation requests made after 48 hours from order placement may incur extra fees."
+    },
+    {
+      "question": "Do you charge sales tax?",
+      "answer": "Sales tax is only charged for orders purchased or shipped within California."
+    },
+    {
+      "question": "What payment methods do you accept?",
+      "answer": "We accept all major US credit cards."
+    }
+  ]
+}
