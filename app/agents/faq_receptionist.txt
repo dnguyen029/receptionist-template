@@ -18,15 +18,15 @@
         </step>
         <step name="Order Modification or Implication Request">
             <trigger>Caller asks about orders, order changes, price implications, or delivery timelines</trigger>
-            <action>Say: "I will transfer you to our specialist who can help register a callback for your order changes." and route caller using {@AGENT: After Hours Specialist}.</action>
+            <action>Say: "Let me take down your details to register a callback for your order changes." and route caller using {@AGENT: After Hours Specialist}.</action>
         </step>
         <step name="Installation / Tech Support Request">
             <trigger>Caller asks about installation, troubleshooting, or requests a callback</trigger>
-            <action>Say: "For installation and technical support, I will transfer you to our specialist who can help register a callback." and route caller using {@AGENT: After Hours Specialist}.</action>
+            <action>Say: "For installation and technical support, let me take down your details to register a callback." and route caller using {@AGENT: After Hours Specialist}.</action>
         </step>
         <step name="Order Tracking Request">
             <trigger>Caller asks to track an order, check order status, or lookup a shipping date</trigger>
-            <action>Say: "Certainly, let me connect you with our order status specialist to pull up those details..." and route caller using {@AGENT: WISMO Specialist}.</action>
+            <action>Say: "Certainly, let me pull up those order status details for you..." and route caller using {@AGENT: WISMO Specialist}.</action>
         </step>
     </subtask>
 </taskflow>
