@@ -1,9 +1,9 @@
-# 🎙️ Enterprise AI Telephony & Customer Service Webhook Template
+# 🎙️ AI Telephony & Customer Service Webhook Template
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Google ADK](https://img.shields.io/badge/Google%20ADK-1.15.0-orange.svg)](https://google.github.io/agent-development-kit/)
 [![Gemini Live](https://img.shields.io/badge/Google%20GenAI-Gemini%20Flash%20Live-purple.svg)](https://cloud.google.com/vertex-ai)
-[![Tests: 100% Passed](https://img.shields.io/badge/Tests-38%2F38%20Passing-brightgreen.svg)](tests/unit/)
+[![Tests: 38/38 Passed](https://img.shields.io/badge/Tests-38%2F38%20Passing-brightgreen.svg)](tests/unit/)
 [![Coverage: 84.6%](https://img.shields.io/badge/Coverage-84.6%25-brightgreen.svg)](tests/unit/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -26,7 +26,7 @@ flowchart TD
     Router -->|After-Hours / Callbacks| LeadCapture[📝 Lead & Ticket Handler\nZendesk REST API + Google Sheets]
     Router -->|Call Complete| Exit[👋 Session Termination\nStructured Disconnect Protocol]
 
-    subgraph Integrations [Resilient Enterprise Integrations]
+    subgraph Integrations [External Service Integrations]
         Lookup --> Sheets[(Google Sheets API\nDynamic Schema & Readonly Scope)]
         LeadCapture --> Zendesk[(Zendesk REST API\nInput Sanitization & Idempotency)]
     end
@@ -44,7 +44,7 @@ While the template includes a runnable e-commerce reference implementation (orde
 | **Healthcare & Clinics** | Appointment confirmation via DOB + Phone | Insurance accepted, office hours, prep steps | Prescription refill callback, triage requests |
 | **Legal & Financial** | Case status, claim updates via Case ID + PIN | Retainer policies, consultation pricing | Confidential intake form, attorney callback |
 | **Real Estate & Property** | Showing status, tenant maintenance via Unit # | Lease terms, pet policies, amenities | Maintenance dispatch ticket, buyer lead capture |
-| **SaaS & B2B Tech** | Subscription status, enterprise tier lookup | SLA terms, API limits, documentation | Priority escalation ticket, demo booking |
+| **SaaS & B2B Tech** | Subscription status, account tier lookup | SLA terms, API limits, documentation | Priority escalation ticket, demo booking |
 | **Field Services / Auto** | Service appointment status via Work Order # | Pricing estimates, service radius, hours | Emergency dispatch request, callback form |
 
 ---
@@ -76,13 +76,13 @@ flowchart TD
 ## 🚀 Key Engineering Disciplines
 
 ### 1. 🔐 Two-Factor Authentication (2FA) for Customer Records
-To prevent unauthorized disclosure of customer PII over voice telephony, record lookup handlers enforce strict two-factor verification:
+To protect customer PII over voice telephony, record lookup handlers require two-factor verification:
 - **Primary Identifier**: Telephony Caller ID, alternate customer phone number, or Reference ID (e.g. `PO-XXXXXX`, `CASE-XXXXX`).
 - **Security Barrier**: 5-digit ZIP code, Last Name, or PIN verification.
-- **Fast-Path Session Cache**: Pre-fetches record status upon handler entry, eliminating redundant network calls.
+- **Fast-Path Session Cache**: Pre-fetches record status upon handler entry to reduce redundant network calls.
 
 ### 2. ⚡ Sub-Second Voice Turn Latency
-- Prompts engineered with strict **<40-word constraints** and single-question mandates.
+- Prompts structured with **<40-word turn budgets** and single-question turns.
 - Native Python client bindings for Google Sheets and Zendesk with connection pooling and timeouts.
 - OpenTelemetry spans for real-time observability of token usage and tool invocation latencies.
 
@@ -91,6 +91,11 @@ To prevent unauthorized disclosure of customer PII over voice telephony, record 
 - Automatic retry handling with exponential backoff on transient third-party API errors (`429`, `502`, `503`).
 - Passes caller `session_id` as an `Idempotency-Key` header to CRM endpoints to prevent duplicate tickets on network retries.
 
+### 4. 🔄 ADK Agent Session Lifecycle Callbacks (`app/agent.py`)
+- **`before_agent_callback` (`router_agent`)**: Extracts and normalizes incoming E.164 telephony Caller ID into canonical ADK session state (`caller_id` and `telephony-caller-id`).
+- **`sub_agent_callback` (`after_hours_receptionist`)**: Propagates Caller ID state when subagent playbooks are invoked directly.
+- **`wismo_sub_agent_callback` (`wismo_receptionist`)**: Pre-fetches customer order status from Google Sheets into `state['auto_wismo_result']` before the LLM executes to reduce mid-turn network latency.
+
 ---
 
 ## 📂 Repository Structure
@@ -98,7 +103,7 @@ To prevent unauthorized disclosure of customer PII over voice telephony, record 
 ```text
 ├── app/
 │   ├── __init__.py
-│   ├── agent.py               # Core ADK multi-agent swarm definition
+│   ├── agent.py               # Core ADK multi-agent router and subagent definition
 │   ├── agent_runtime_app.py   # FastAPI server & telemetry hooks
 │   ├── tools.py               # ADK tool definitions (Record Lookup, Lead Capture, Session End)
 │   ├── tools_lib/             # Hardened client wrappers
@@ -116,8 +121,8 @@ To prevent unauthorized disclosure of customer PII over voice telephony, record 
 │       ├── exit_agent.txt     # Session disconnect specialist
 │       └── faq_data.json      # Static knowledge base
 ├── tests/
-│   ├── conftest.py            # Zero-credential test environment fixture
-│   └── unit/                  # 100% Mocked Offline Unit Tests (38 Tests, 84.6% Coverage)
+│   ├── conftest.py            # Offline test environment fixture
+│   └── unit/                  # Mocked Offline Unit Tests (38 Tests, 84.6% Coverage)
 │       ├── test_agent_callbacks.py
 │       ├── test_environment_sanity.py
 │       ├── test_sheets_lead.py
@@ -160,9 +165,9 @@ uv sync
 
 ---
 
-### 2. Run Offline Unit Tests (Zero Credentials Required)
+### 2. Run Offline Unit Tests (No Cloud Credentials Required)
 
-All unit tests are fully mocked and execute deterministically in **< 3 seconds without cloud credentials**:
+Unit tests use mocked fixtures and execute locally in **~2.8 seconds without cloud credentials**:
 
 ```bash
 pytest tests/unit/ -v --cov=app --cov-report=term-missing
@@ -202,11 +207,11 @@ Code coverage is measured using `pytest-cov` against all executable statements a
 
 $$\text{Coverage} = \frac{\text{Executed Statements (485)}}{\text{Total Analyzed Statements (573)}} = 84.64\%$$
 
-* **Tooling**: `pytest-cov` with strict statement and branch execution tracking configured in `pyproject.toml`.
+* **Tooling**: `pytest-cov` with statement and branch execution tracking configured in `pyproject.toml`.
 * **Coverage Floor Gate**: Configured with `--cov-fail-under=80` in `scripts/pre_push_check.sh` and GitHub Actions CI, blocking any commit that drops below the 80% coverage threshold.
 
 ### 2. Unit Test Suite Breakdown (`38 Tests`)
-All 38 unit tests run 100% offline with zero cloud credentials in ~2.8 seconds:
+All 38 unit tests run offline using mocked fixtures without cloud credentials in ~2.8 seconds:
 
 | Test Module | Tests | Focus Area & Scenarios Covered |
 | :--- | :---: | :--- |
@@ -217,11 +222,11 @@ All 38 unit tests run 100% offline with zero cloud credentials in ~2.8 seconds:
 | `test_sheets_lead.py` | **3** | Lead log formatting, session ID deduplication, and Google Sheets API error recovery. |
 | `test_telemetry.py` | **2** | OpenTelemetry tracer configuration and disabled/enabled telemetry state toggles. |
 | `test_environment_sanity.py` | **1** | Missing environment variable defensive error handling. |
-| **Total** | **38** | **100% Passing (0 Network Calls, Runtime: ~2.8s)** |
+| **Total** | **38** | **38/38 Passing (Offline Mocked Suite, Runtime: ~2.8s)** |
 
 ### 3. Sub-Second Latency Architecture
 * **< 40-Word Turn Constraint**: Enforced in prompt directives (`app/agents/`) to minimize text-to-speech audio rendering latency in real-time telephony streaming.
-* **Pre-Session CallerID Cache**: The `wismo_sub_agent_callback` pre-fetches customer records into session state upon subagent transfer, eliminating in-turn HTTP latency.
+* **Pre-Session CallerID Cache**: The `wismo_sub_agent_callback` pre-fetches customer records into session state upon subagent transfer, reducing in-turn HTTP latency.
 
 ---
 
@@ -248,7 +253,7 @@ cp .env.template .env
 
 ## Ecosystem & Related Repositories
 
-* **[antigravity-sdk](https://github.com/dnguyen029/antigravity-sdk)** — Autonomous multi-agent Python swarm runtime and governance framework.
+* **[antigravity-sdk](https://github.com/dnguyen029/antigravity-sdk)** — Multi-agent Python orchestration runtime and lifecycle governance framework.
 * **[antigravity-portfolio](https://github.com/dnguyen029/antigravity-portfolio)** — Technical operations portfolio showcasing end-to-end multi-agent governance and architecture.
 
 ---
